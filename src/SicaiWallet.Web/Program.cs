@@ -1,7 +1,18 @@
+using Microsoft.EntityFrameworkCore;
+using SicaiWallet.Web.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+var connectionString = builder.Configuration
+    .GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException(
+        "Connection string 'DefaultConnection' was not found.");
+
+builder.Services.AddDbContext<WalletDbContext>(options =>
+    options.UseSqlServer(connectionString));
 
 var app = builder.Build();
 
