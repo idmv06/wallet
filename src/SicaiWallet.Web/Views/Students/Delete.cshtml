@@ -1,0 +1,27 @@
+@model SicaiWallet.Web.Models.Student
+
+@{
+    ViewData["Title"] = "Eliminar estudiante";
+}
+
+<h1>Eliminar estudiante</h1>
+
+<h3>¿Estás seguro de que deseas eliminar este estudiante?</h3>
+
+<div>
+    <p><strong>Carné:</strong> @Model.SicaiStudentId</p>
+    <p><strong>Nombre:</strong> @Model.FirstName</p>
+    <p><strong>Apellido:</strong> @Model.LastName</p>
+</div>
+
+<form asp-controller="Students"
+      asp-action="Delete"
+      asp-route-id="@Model.Id"
+      method="post">
+
+    <button type="submit">Sí, eliminar</button>
+
+    <a asp-controller="Students" asp-action="Index">
+        Cancelar
+    </a>
+</form>

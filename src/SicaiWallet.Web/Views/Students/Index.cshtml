@@ -26,8 +26,10 @@ else
                 <th>Nombre</th>
                 <th>Apellido</th>
                 <th>Estado</th>
+                <th>Acciones</th>
             </tr>
         </thead>
+
         <tbody>
             @foreach (var student in Model)
             {
@@ -37,6 +39,19 @@ else
                     <td>@student.FirstName</td>
                     <td>@student.LastName</td>
                     <td>@(student.IsActive ? "Activo" : "Inactivo")</td>
+                    <td>
+                        <a asp-controller="Students"
+                           asp-action="Edit"
+                           asp-route-id="@student.Id">
+                            Editar
+                        </a>
+
+                        <a asp-controller="Students"
+                         asp-action="Delete"
+                          asp-route-id="@student.Id">
+                          Eliminar
+                        </a>
+                    </td>
                 </tr>
             }
         </tbody>
