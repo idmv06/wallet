@@ -1,0 +1,38 @@
+
+@model SicaiWallet.Web.Models.Student
+
+@{
+    ViewData["Title"] = "Registrar estudiante";
+}
+
+<h1>Registrar estudiante</h1>
+
+<form asp-controller="Students" asp-action="Create" method="post">
+
+    <div>
+        <label asp-for="SicaiStudentId">Carné SICAI</label>
+        <input asp-for="SicaiStudentId" />
+        <span asp-validation-for="SicaiStudentId"></span>
+    </div>
+
+    <div>
+        <label asp-for="FirstName">Nombre</label>
+        <input asp-for="FirstName" />
+        <span asp-validation-for="FirstName"></span>
+    </div>
+
+    <div>
+        <label asp-for="LastName">Apellido</label>
+        <input asp-for="LastName" />
+        <span asp-validation-for="LastName"></span>
+    </div>
+
+    <button type="submit">Registrar estudiante</button>
+
+</form>
+
+<p>
+    <a asp-controller="Students" asp-action="Index">
+        Volver a estudiantes
+    </a>
+</p>
