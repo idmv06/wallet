@@ -19,4 +19,6 @@ public class Student
     public string LastName { get; set; } = string.Empty;
 
     public bool IsActive { get; set; } = true;
+
+    public WalletAccount? WalletAccount { get; set; }
 }

@@ -1,0 +1,47 @@
+@model IEnumerable<SicaiWallet.Web.Models.WalletAccount>
+
+@{
+    ViewData["Title"] = "Wallets";
+}
+
+<h1>Wallets</h1>
+
+<p>Listado de billeteras registradas en SICAI Wallet.</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Estudiante</th>
+            <th>Carné</th>
+            <th>Saldo</th>
+            <th>Estado</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var wallet in Model)
+        {
+            <tr>
+                <td>
+                    @wallet.Student.FirstName @wallet.Student.LastName
+                </td>
+
+                <td>
+                    @wallet.Student.SicaiStudentId
+                </td>
+
+                <td>
+                    ₡@wallet.Balance.ToString("N2")
+                </td>
+
+                <td>
+                    @(wallet.IsActive ? "Activa" : "Inactiva")
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-controller="Students" asp-action="Index" class="btn btn-secondary">
+    Volver a estudiantes
+</a>

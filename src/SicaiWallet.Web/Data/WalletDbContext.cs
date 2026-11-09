@@ -11,6 +11,7 @@ public class WalletDbContext : DbContext
     }
 
     public DbSet<Student> Students => Set<Student>();
+    public DbSet<WalletAccount> WalletAccounts => Set<WalletAccount>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -19,5 +20,16 @@ public class WalletDbContext : DbContext
         modelBuilder.Entity<Student>()
             .HasIndex(student => student.SicaiStudentId)
             .IsUnique();
+            
+        modelBuilder.Entity<WalletAccount>()
+        .Property(wallet => wallet.Balance)
+        .HasPrecision(18, 2);
+
+
+        modelBuilder.Entity<Student>()
+        .HasOne(student => student.WalletAccount)
+        .WithOne(wallet => wallet.Student)
+        .HasForeignKey<WalletAccount>(wallet => wallet.StudentId);
+
     }
 }

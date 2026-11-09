@@ -33,9 +33,18 @@ public IActionResult Create()
 [ValidateAntiForgeryToken]
 public IActionResult Create(Student student)
 {
-    if (!ModelState.IsValid)
+    if (ModelState.IsValid)
     {
-        return View(student);
+    student.WalletAccount = new WalletAccount
+    {
+        Balance = 0,
+        IsActive = true
+    };
+
+    _context.Students.Add(student);
+    _context.SaveChanges();
+
+    return RedirectToAction(nameof(Index));
     }
 
     _context.Students.Add(student);

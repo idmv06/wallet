@@ -54,6 +54,48 @@ namespace SicaiWallet.Web.Migrations
 
                     b.ToTable("Students");
                 });
+
+            modelBuilder.Entity("SicaiWallet.Web.Models.WalletAccount", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Balance")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StudentId")
+                        .IsUnique();
+
+                    b.ToTable("WalletAccounts");
+                });
+
+            modelBuilder.Entity("SicaiWallet.Web.Models.WalletAccount", b =>
+                {
+                    b.HasOne("SicaiWallet.Web.Models.Student", "Student")
+                        .WithOne("WalletAccount")
+                        .HasForeignKey("SicaiWallet.Web.Models.WalletAccount", "StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("SicaiWallet.Web.Models.Student", b =>
+                {
+                    b.Navigation("WalletAccount");
+                });
 #pragma warning restore 612, 618
         }
     }
