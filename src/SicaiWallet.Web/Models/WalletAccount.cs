@@ -13,4 +13,8 @@ public class WalletAccount
     public decimal Balance { get; set; } = 0;
 
     public bool IsActive { get; set; } = true;
+
+    public ICollection<WalletTransaction> Transactions { get; set; }
+    = new List<WalletTransaction>();
+    
 }

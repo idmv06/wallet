@@ -1,0 +1,53 @@
+@model SicaiWallet.Web.Models.ViewModels.RechargeViewModel
+
+@{
+    ViewData["Title"] = "Recharge Wallet";
+}
+
+<h1>Recharge Wallet</h1>
+
+<div class="mb-3">
+    <p><strong>Student:</strong> @ViewBag.StudentName</p>
+    <p><strong>Student ID:</strong> @ViewBag.StudentId</p>
+</div>
+
+<form asp-controller="Wallets" asp-action="Recharge" method="post">
+
+    <input type="hidden" asp-for="WalletAccountId" />
+     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="Amount" class="form-label">Amount</label>
+        <input asp-for="Amount" type="number"
+               class="form-control" step="0.01" min="0.01" />
+
+        <span asp-validation-for="Amount"
+              class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label">
+            Descripción
+        </label>
+
+        <input asp-for="Description" class="form-control" />
+
+        <span asp-validation-for="Description"
+              class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        Recargar
+    </button>
+
+    <a asp-action="Index" class="btn btn-secondary">
+        Cancelar
+    </a>
+
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

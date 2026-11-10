@@ -15,6 +15,7 @@
             <th>Carné</th>
             <th>Saldo</th>
             <th>Estado</th>
+            <th>Acciones</th>
         </tr>
     </thead>
 
@@ -36,6 +37,13 @@
 
                 <td>
                     @(wallet.IsActive ? "Activa" : "Inactiva")
+                </td>
+                <td>
+                    <a asp-action="Recharge"
+                     asp-route-id="@wallet.Id"
+                        class="btn btn-success btn-sm">
+                         Recargar
+                    </a>
                 </td>
             </tr>
         }
