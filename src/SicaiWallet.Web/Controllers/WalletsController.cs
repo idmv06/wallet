@@ -94,4 +94,88 @@ public class WalletsController : Controller
 
      return RedirectToAction(nameof(Index));
     }
+
+    [HttpGet]
+public IActionResult Purchase(int id)
+{
+    var wallet = _context.WalletAccounts
+        .Include(wallet => wallet.Student)
+        .FirstOrDefault(wallet => wallet.Id == id);
+
+        if (wallet == null)
+        {
+        return NotFound();
+        }
+
+        var model = new PurchaseViewModel
+        {
+            WalletAccountId = wallet.Id
+        };
+
+        ViewBag.StudentName =
+        $"{wallet.Student.FirstName} {wallet.Student.LastName}";   
+
+        ViewBag.StudentId = wallet.Student.SicaiStudentId;
+        ViewBag.Balance = wallet.Balance;
+
+        return View(model);
+    }
+
+    [HttpPost]
+[ValidateAntiForgeryToken]
+public IActionResult Purchase(PurchaseViewModel model)
+    {
+        using var dbTransaction = _context.Database.BeginTransaction(
+        System.Data.IsolationLevel.Serializable);
+
+        var wallet = _context.WalletAccounts
+        .Include(wallet => wallet.Student)
+        .FirstOrDefault(wallet => wallet.Id == model.WalletAccountId);
+
+        if (wallet == null)
+        {
+            return NotFound();
+        }
+
+        ViewBag.StudentName =
+            $"{wallet.Student.FirstName} {wallet.Student.LastName}";
+
+        ViewBag.StudentId = wallet.Student.SicaiStudentId;
+        ViewBag.Balance = wallet.Balance;
+
+        if (!wallet.IsActive)
+            {
+                ModelState.AddModelError("", "This wallet is inactive.");
+        }
+
+        if (ModelState.IsValid && wallet.Balance < model.Amount)
+        {
+            ModelState.AddModelError("", "Insufficient wallet balance.");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        // Deduct the purchase amount
+        wallet.Balance -= model.Amount;
+
+        // Create purchase transaction
+        var transaction = new WalletTransaction
+        {
+            WalletAccountId = wallet.Id,
+            Type = WalletTransactionType.Purchase,
+            Amount = model.Amount,
+            Description = model.Description
+        };
+
+        _context.WalletTransactions.Add(transaction);
+
+        // Save changes and commit the database transaction
+        _context.SaveChanges();
+        dbTransaction.Commit();
+
+        return RedirectToAction(nameof(Index));
+    }
 }

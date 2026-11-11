@@ -1,0 +1,63 @@
+@model SicaiWallet.Web.Models.ViewModels.PurchaseViewModel
+
+@{
+    ViewData["Title"] = "Purchase";
+}
+
+<h1>Make a Purchase</h1>
+
+<div class="mb-3">
+    <p><strong>Student:</strong> @ViewBag.StudentName</p>
+    <p><strong>Student ID:</strong> @ViewBag.StudentId</p>
+    <p><strong>Available Balance:</strong> ₡@(((decimal)ViewBag.Balance).ToString("N2"))</p>
+</div>
+
+<form asp-controller="Wallets" asp-action="Purchase" method="post">
+
+    <input type="hidden" asp-for="WalletAccountId" />
+
+    <div asp-validation-summary="ModelOnly"
+         class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="Amount" class="form-label">
+            Purchase Amount
+        </label>
+
+        <input asp-for="Amount"
+               type="number"
+               class="form-control"
+               step="0.01"
+               min="0.01" />
+
+        <span asp-validation-for="Amount"
+              class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label">
+            Description
+        </label>
+
+        <input asp-for="Description"
+               class="form-control" />
+
+        <span asp-validation-for="Description"
+              class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-danger">
+        Confirm Purchase
+    </button>
+
+    <a asp-action="Index" class="btn btn-secondary">
+        Cancel
+    </a>
+
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

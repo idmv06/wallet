@@ -40,11 +40,19 @@
                 </td>
                 <td>
                     <a asp-action="Recharge"
-                     asp-route-id="@wallet.Id"
+                        asp-route-id="@wallet.Id"
                         class="btn btn-success btn-sm">
-                         Recargar
+                        Recargar
+                    </a>
+
+                    <a asp-action="Purchase"
+                        asp-route-id="@wallet.Id"
+                        class="btn btn-danger btn-sm">
+                        Purchase
                     </a>
                 </td>
+
+                
             </tr>
         }
     </tbody>
