@@ -178,4 +178,31 @@ public IActionResult Purchase(PurchaseViewModel model)
 
         return RedirectToAction(nameof(Index));
     }
+
+    [HttpGet]
+    public IActionResult History(int id)
+    {
+        var wallet = _context.WalletAccounts
+            .Include(wallet => wallet.Student)
+            .FirstOrDefault(wallet => wallet.Id == id);
+
+        if (wallet == null)
+        {
+            return NotFound();
+        }
+
+            var transactions = _context.WalletTransactions
+            .Where(transaction => transaction.WalletAccountId == id)
+            .OrderByDescending(transaction => transaction.CreatedAt)
+            .ToList();
+
+        ViewBag.StudentName =
+            $"{wallet.Student.FirstName} {wallet.Student.LastName}";
+
+        ViewBag.StudentId = wallet.Student.SicaiStudentId;
+        ViewBag.Balance = wallet.Balance;
+        ViewBag.WalletId = wallet.Id;
+
+        return View(transactions);
+    }
 }
