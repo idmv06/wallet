@@ -41,5 +41,11 @@ public class WalletDbContext : DbContext
          .WithOne(transaction => transaction.WalletAccount)
           .HasForeignKey(transaction => transaction.WalletAccountId)
          .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<WalletTransaction>()
+            .HasOne(transaction => transaction.OriginalTransaction)
+            .WithMany(transaction => transaction.Refunds)
+            .HasForeignKey(transaction => transaction.OriginalTransactionId)
+            .OnDelete(DeleteBehavior.Restrict); 
     }
 }

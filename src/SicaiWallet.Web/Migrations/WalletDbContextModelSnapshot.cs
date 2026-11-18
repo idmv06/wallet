@@ -101,6 +101,9 @@ namespace SicaiWallet.Web.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<int?>("OriginalTransactionId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
@@ -108,6 +111,8 @@ namespace SicaiWallet.Web.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("OriginalTransactionId");
 
                     b.HasIndex("WalletAccountId");
 
@@ -127,11 +132,18 @@ namespace SicaiWallet.Web.Migrations
 
             modelBuilder.Entity("SicaiWallet.Web.Models.WalletTransaction", b =>
                 {
+                    b.HasOne("SicaiWallet.Web.Models.WalletTransaction", "OriginalTransaction")
+                        .WithMany("Refunds")
+                        .HasForeignKey("OriginalTransactionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("SicaiWallet.Web.Models.WalletAccount", "WalletAccount")
                         .WithMany("Transactions")
                         .HasForeignKey("WalletAccountId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("OriginalTransaction");
 
                     b.Navigation("WalletAccount");
                 });
@@ -144,6 +156,11 @@ namespace SicaiWallet.Web.Migrations
             modelBuilder.Entity("SicaiWallet.Web.Models.WalletAccount", b =>
                 {
                     b.Navigation("Transactions");
+                });
+
+            modelBuilder.Entity("SicaiWallet.Web.Models.WalletTransaction", b =>
+                {
+                    b.Navigation("Refunds");
                 });
 #pragma warning restore 612, 618
         }

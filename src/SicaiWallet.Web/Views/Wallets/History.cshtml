@@ -24,6 +24,7 @@
             <th>Type</th>
             <th>Amount</th>
             <th>Description</th>
+            <th>Actions</th>
         </tr>
     </thead>
 
@@ -31,16 +32,22 @@
         @if (!Model.Any())
         {
             <tr>
-                <td colspan="4">No transactions found.</td>
+                <td colspan="5">No transactions found.</td>
             </tr>
         }
         else
         {
             @foreach (var transaction in Model)
             {
+                var refundedAmount = transaction.Refunds
+                    .Where(refund => refund.Type == SicaiWallet.Web.Models.WalletTransactionType.Refund)
+                    .Sum(refund => refund.Amount);
+
+                var remainingAmount = transaction.Amount - refundedAmount;
+
                 <tr>
                     <td>
-                        @transaction.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                        @(transaction.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm"))
                     </td>
 
                     <td>
@@ -52,10 +59,15 @@
                         {
                             <span class="badge bg-danger">Purchase</span>
                         }
+                        else if (transaction.Type == SicaiWallet.Web.Models.WalletTransactionType.Refund)
+                        {
+                            <span class="badge bg-info text-dark">Refund</span>
+                        }
                     </td>
 
                     <td>
-                        @if (transaction.Type == SicaiWallet.Web.Models.WalletTransactionType.Recharge)
+                        @if (transaction.Type == SicaiWallet.Web.Models.WalletTransactionType.Recharge ||
+                             transaction.Type == SicaiWallet.Web.Models.WalletTransactionType.Refund)
                         {
                             <span class="text-success fw-semibold">
                                 +₡@transaction.Amount.ToString("N2")
@@ -71,6 +83,34 @@
 
                     <td>
                         @transaction.Description
+                    </td>
+
+                    <td>
+                        @if (transaction.Type == SicaiWallet.Web.Models.WalletTransactionType.Purchase)
+                        {
+                            if (remainingAmount > 0)
+                            {
+                                <a asp-controller="Wallets"
+                                   asp-action="Refund"
+                                   asp-route-id="@transaction.Id"
+                                   class="btn btn-warning btn-sm">
+                                    Refund
+                                </a>
+
+                                if (refundedAmount > 0)
+                                {
+                                    <small class="text-muted d-block mt-1">
+                                        Remaining: ₡@remainingAmount.ToString("N2")
+                                    </small>
+                                }
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">
+                                    Fully Refunded
+                                </span>
+                            }
+                        }
                     </td>
                 </tr>
             }

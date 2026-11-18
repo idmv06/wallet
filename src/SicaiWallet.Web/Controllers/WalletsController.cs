@@ -15,6 +15,7 @@ public class WalletsController : Controller
         _context = context;
     }
 
+    // Display all wallets
     public IActionResult Index()
     {
         var wallets = _context.WalletAccounts
@@ -24,56 +25,60 @@ public class WalletsController : Controller
         return View(wallets);
     }
 
+    // RECHARGE - GET
     [HttpGet]
     public IActionResult Recharge(int id)
     {
         var wallet = _context.WalletAccounts
             .Include(wallet => wallet.Student)
-        .FirstOrDefault(wallet => wallet.Id == id);
+            .FirstOrDefault(wallet => wallet.Id == id);
 
-      if (wallet == null)
+        if (wallet == null)
         {
             return NotFound();
-     }
+        }
 
-      var model = new RechargeViewModel
-     {
-         WalletAccountId = wallet.Id
-     };
+        var model = new RechargeViewModel
+        {
+            WalletAccountId = wallet.Id
+        };
 
-     ViewBag.StudentName = $"{wallet.Student.FirstName} {wallet.Student.LastName}";
-     ViewBag.StudentId = wallet.Student.SicaiStudentId;
+        ViewBag.StudentName =
+            $"{wallet.Student.FirstName} {wallet.Student.LastName}";
 
-     return View(model);
+        ViewBag.StudentId = wallet.Student.SicaiStudentId;
+
+        return View(model);
     }
 
+    // RECHARGE - POST
     [HttpPost]
     [ValidateAntiForgeryToken]
     public IActionResult Recharge(RechargeViewModel model)
     {
-     var wallet = _context.WalletAccounts
-         .Include(wallet => wallet.Student)
-         .FirstOrDefault(wallet => wallet.Id == model.WalletAccountId);
+        var wallet = _context.WalletAccounts
+            .Include(wallet => wallet.Student)
+            .FirstOrDefault(wallet => wallet.Id == model.WalletAccountId);
 
-     if (wallet == null)
-     {
-         return NotFound();
-     }
+        if (wallet == null)
+        {
+            return NotFound();
+        }
 
-     if (!wallet.IsActive)
-     {
-         ModelState.AddModelError("", "This wallet is inactive.");
-     }
+        if (!wallet.IsActive)
+        {
+            ModelState.AddModelError("", "This wallet is inactive.");
+        }
 
-     if (!ModelState.IsValid)
-     {
-         ViewBag.StudentName =
-             $"{wallet.Student.FirstName} {wallet.Student.LastName}";
+        if (!ModelState.IsValid)
+        {
+            ViewBag.StudentName =
+                $"{wallet.Student.FirstName} {wallet.Student.LastName}";
 
-         ViewBag.StudentId = wallet.Student.SicaiStudentId;
+            ViewBag.StudentId = wallet.Student.SicaiStudentId;
 
-         return View(model);
-     }
+            return View(model);
+        }
 
         // Update wallet balance
         wallet.Balance += model.Amount;
@@ -81,30 +86,31 @@ public class WalletsController : Controller
         // Create transaction record
         var transaction = new WalletTransaction
         {
-        WalletAccountId = wallet.Id,
-        Type = WalletTransactionType.Recharge,
-        Amount = model.Amount,
-        Description = model.Description
-     };
+            WalletAccountId = wallet.Id,
+            Type = WalletTransactionType.Recharge,
+            Amount = model.Amount,
+            Description = model.Description
+        };
 
-     _context.WalletTransactions.Add(transaction);
+        _context.WalletTransactions.Add(transaction);
 
-     // Save both changes
-     _context.SaveChanges();
+        // Save both changes
+        _context.SaveChanges();
 
-     return RedirectToAction(nameof(Index));
+        return RedirectToAction(nameof(Index));
     }
 
+    // PURCHASE - GET
     [HttpGet]
-public IActionResult Purchase(int id)
-{
-    var wallet = _context.WalletAccounts
-        .Include(wallet => wallet.Student)
-        .FirstOrDefault(wallet => wallet.Id == id);
+    public IActionResult Purchase(int id)
+    {
+        var wallet = _context.WalletAccounts
+            .Include(wallet => wallet.Student)
+            .FirstOrDefault(wallet => wallet.Id == id);
 
         if (wallet == null)
         {
-        return NotFound();
+            return NotFound();
         }
 
         var model = new PurchaseViewModel
@@ -113,7 +119,7 @@ public IActionResult Purchase(int id)
         };
 
         ViewBag.StudentName =
-        $"{wallet.Student.FirstName} {wallet.Student.LastName}";   
+            $"{wallet.Student.FirstName} {wallet.Student.LastName}";
 
         ViewBag.StudentId = wallet.Student.SicaiStudentId;
         ViewBag.Balance = wallet.Balance;
@@ -121,16 +127,17 @@ public IActionResult Purchase(int id)
         return View(model);
     }
 
+    // PURCHASE - POST
     [HttpPost]
-[ValidateAntiForgeryToken]
-public IActionResult Purchase(PurchaseViewModel model)
+    [ValidateAntiForgeryToken]
+    public IActionResult Purchase(PurchaseViewModel model)
     {
         using var dbTransaction = _context.Database.BeginTransaction(
-        System.Data.IsolationLevel.Serializable);
+            System.Data.IsolationLevel.Serializable);
 
         var wallet = _context.WalletAccounts
-        .Include(wallet => wallet.Student)
-        .FirstOrDefault(wallet => wallet.Id == model.WalletAccountId);
+            .Include(wallet => wallet.Student)
+            .FirstOrDefault(wallet => wallet.Id == model.WalletAccountId);
 
         if (wallet == null)
         {
@@ -144,8 +151,8 @@ public IActionResult Purchase(PurchaseViewModel model)
         ViewBag.Balance = wallet.Balance;
 
         if (!wallet.IsActive)
-            {
-                ModelState.AddModelError("", "This wallet is inactive.");
+        {
+            ModelState.AddModelError("", "This wallet is inactive.");
         }
 
         if (ModelState.IsValid && wallet.Balance < model.Amount)
@@ -179,6 +186,7 @@ public IActionResult Purchase(PurchaseViewModel model)
         return RedirectToAction(nameof(Index));
     }
 
+    // HISTORY - GET 
     [HttpGet]
     public IActionResult History(int id)
     {
@@ -191,18 +199,145 @@ public IActionResult Purchase(PurchaseViewModel model)
             return NotFound();
         }
 
-            var transactions = _context.WalletTransactions
-            .Where(transaction => transaction.WalletAccountId == id)
-            .OrderByDescending(transaction => transaction.CreatedAt)
-            .ToList();
-
+       var transactions = _context.WalletTransactions
+         .Include(transaction => transaction.Refunds)
+         .Where(transaction => transaction.WalletAccountId == id)
+         .OrderByDescending(transaction => transaction.CreatedAt)
+         .ToList();
         ViewBag.StudentName =
             $"{wallet.Student.FirstName} {wallet.Student.LastName}";
 
         ViewBag.StudentId = wallet.Student.SicaiStudentId;
         ViewBag.Balance = wallet.Balance;
         ViewBag.WalletId = wallet.Id;
+        
 
         return View(transactions);
+    }
+
+    // REFUND - GET
+    [HttpGet]
+    public IActionResult Refund(int id)
+    {
+        var purchase = _context.WalletTransactions
+            .Include(transaction => transaction.WalletAccount)
+            .ThenInclude(wallet => wallet.Student)
+            .FirstOrDefault(transaction => transaction.Id == id);
+
+        if (purchase == null ||
+            purchase.Type != WalletTransactionType.Purchase)
+        {
+            return NotFound();
+        }
+
+        var refundedAmount = _context.WalletTransactions
+            .Where(transaction =>
+                transaction.OriginalTransactionId == id &&
+                transaction.Type == WalletTransactionType.Refund)
+            .Sum(transaction => (decimal?)transaction.Amount) ?? 0m;
+
+        var remainingAmount = purchase.Amount - refundedAmount;
+
+        if (remainingAmount <= 0)
+        {
+            return BadRequest(
+                "This purchase has already been fully refunded.");
+        }
+
+        var model = new RefundViewModel
+        {
+            OriginalTransactionId = purchase.Id,
+            Amount = remainingAmount
+        };
+
+        ViewBag.StudentName =
+            $"{purchase.WalletAccount.Student.FirstName} {purchase.WalletAccount.Student.LastName}";
+
+        ViewBag.StudentId = purchase.WalletAccount.Student.SicaiStudentId;
+        ViewBag.PurchaseAmount = purchase.Amount;
+        ViewBag.RefundedAmount = refundedAmount;
+        ViewBag.RemainingAmount = remainingAmount;
+
+        return View(model);
+    }
+
+    // REFUND - POST
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult Refund(RefundViewModel model)
+    {
+        using var dbTransaction = _context.Database.BeginTransaction(
+            System.Data.IsolationLevel.Serializable);
+
+        var purchase = _context.WalletTransactions
+            .Include(transaction => transaction.WalletAccount)
+            .ThenInclude(wallet => wallet.Student)
+            .FirstOrDefault(transaction =>
+                transaction.Id == model.OriginalTransactionId);
+
+        if (purchase == null ||
+            purchase.Type != WalletTransactionType.Purchase)
+        {
+            return NotFound();
+        }
+
+        var refundedAmount = _context.WalletTransactions
+            .Where(transaction =>
+                transaction.OriginalTransactionId == purchase.Id &&
+                transaction.Type == WalletTransactionType.Refund)
+            .Sum(transaction => (decimal?)transaction.Amount) ?? 0m;
+
+        var remainingAmount = purchase.Amount - refundedAmount;
+
+        ViewBag.StudentName =
+            $"{purchase.WalletAccount.Student.FirstName} {purchase.WalletAccount.Student.LastName}";
+
+        ViewBag.StudentId = purchase.WalletAccount.Student.SicaiStudentId;
+        ViewBag.PurchaseAmount = purchase.Amount;
+        ViewBag.RefundedAmount = refundedAmount;
+        ViewBag.RemainingAmount = remainingAmount;
+
+        if (ModelState.IsValid && model.Amount > remainingAmount)
+        {
+            ModelState.AddModelError(
+                "Amount",
+                "The refund amount exceeds the remaining refundable amount.");
+        }
+
+        if (remainingAmount <= 0)
+        {
+            ModelState.AddModelError(
+                "",
+                "This purchase has already been fully refunded.");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        // Return money to the original wallet
+        purchase.WalletAccount.Balance += model.Amount;
+
+        // Create refund transaction
+        var refund = new WalletTransaction
+        {
+            WalletAccountId = purchase.WalletAccountId,
+            OriginalTransactionId = purchase.Id,
+            Type = WalletTransactionType.Refund,
+            Amount = model.Amount,
+            Description = model.Description
+        };
+
+        _context.WalletTransactions.Add(refund);
+
+        // Save and commit both changes
+        _context.SaveChanges();
+
+        dbTransaction.Commit();
+
+        return RedirectToAction(
+            nameof(History),
+            new { id = purchase.WalletAccountId });
     }
 }

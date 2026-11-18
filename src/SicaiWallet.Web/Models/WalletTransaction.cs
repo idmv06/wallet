@@ -19,4 +19,12 @@ public class WalletTransaction
     public string? Description { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public int? OriginalTransactionId { get; set; }
+
+    public WalletTransaction? OriginalTransaction { get; set; }
+
+    public ICollection<WalletTransaction> Refunds { get; set; }
+    = new List<WalletTransaction>();
+
 }
