@@ -1,38 +1,107 @@
-
 @model SicaiWallet.Web.Models.Student
 
 @{
     ViewData["Title"] = "Registrar estudiante";
 }
 
-<h1>Registrar estudiante</h1>
+<div class="student-form-page">
 
-<form asp-controller="Students" asp-action="Create" method="post">
+    <div class="student-form-heading">
+        <span class="students-eyebrow">GESTIÓN ACADÉMICA</span>
 
-    <div>
-        <label asp-for="SicaiStudentId">Carné SICAI</label>
-        <input asp-for="SicaiStudentId" />
-        <span asp-validation-for="SicaiStudentId"></span>
+        <h1>Registrar estudiante</h1>
+
+        <p>
+            Ingresa la información del estudiante para registrarlo
+            en SICAI Wallet.
+        </p>
     </div>
 
-    <div>
-        <label asp-for="FirstName">Nombre</label>
-        <input asp-for="FirstName" />
-        <span asp-validation-for="FirstName"></span>
+    <div class="student-form-card">
+
+        <div class="student-form-card-header">
+            <h4>Información del estudiante</h4>
+            <p>Los campos marcados son obligatorios.</p>
+        </div>
+
+        <div class="student-form-card-body">
+
+            <form asp-controller="Students"
+                  asp-action="Create"
+                  method="post">
+
+                <div asp-validation-summary="ModelOnly"
+                     class="text-danger mb-3"></div>
+
+                <div class="mb-4">
+                    <label asp-for="SicaiStudentId"
+                           class="form-label">
+                        Carné SICAI
+                    </label>
+
+                    <input asp-for="SicaiStudentId"
+                           class="form-control form-control-lg"
+                           placeholder="Ej. 2026001234" />
+
+                    <span asp-validation-for="SicaiStudentId"
+                          class="text-warning small"></span>
+                </div>
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label asp-for="FirstName"
+                               class="form-label">
+                            Nombre
+                        </label>
+
+                        <input asp-for="FirstName"
+                               class="form-control form-control-lg"
+                               placeholder="Nombre del estudiante" />
+
+                        <span asp-validation-for="FirstName"
+                              class="text-warning small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="LastName"
+                               class="form-label">
+                            Apellido
+                        </label>
+
+                        <input asp-for="LastName"
+                               class="form-control form-control-lg"
+                               placeholder="Apellido del estudiante" />
+
+                        <span asp-validation-for="LastName"
+                              class="text-warning small"></span>
+                    </div>
+
+                </div>
+
+                <div class="student-form-actions">
+
+                    <button type="submit" class="btn btn-morado">
+                        Registrar estudiante
+                    </button>
+
+                    <a asp-controller="Students"
+                       asp-action="Index"
+                       class="btn btn-outline-light">
+                        Cancelar
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
     </div>
 
-    <div>
-        <label asp-for="LastName">Apellido</label>
-        <input asp-for="LastName" />
-        <span asp-validation-for="LastName"></span>
-    </div>
+</div>
 
-    <button type="submit">Registrar estudiante</button>
-
-</form>
-
-<p>
-    <a asp-controller="Students" asp-action="Index">
-        Volver a estudiantes
-    </a>
-</p>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

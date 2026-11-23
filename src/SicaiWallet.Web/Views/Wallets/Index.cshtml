@@ -1,69 +1,174 @@
 @model IEnumerable<SicaiWallet.Web.Models.WalletAccount>
 
 @{
-    ViewData["Title"] = "Wallets";
+    ViewData["Title"] = "Billeteras";
+
+    var wallets = Model.ToList();
+    var activeWallets = wallets.Count(wallet => wallet.IsActive);
+    var totalBalance = wallets.Sum(wallet => wallet.Balance);
 }
 
-<h1>Wallets</h1>
+<div class="wallets-page">
 
-<p>Listado de billeteras registradas en SICAI Wallet.</p>
+    <div class="wallets-heading">
+        <div>
+            <span class="students-eyebrow">GESTIÓN FINANCIERA</span>
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Estudiante</th>
-            <th>Carné</th>
-            <th>Saldo</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
+            <h1>Billeteras</h1>
 
-    <tbody>
-        @foreach (var wallet in Model)
+            <p>
+                Consulta y administra las billeteras de los estudiantes.
+            </p>
+        </div>
+
+        <a asp-controller="Students"
+           asp-action="Index"
+           class="btn btn-morado">
+            Ver estudiantes
+        </a>
+    </div>
+
+    <!-- ESTADÍSTICAS -->
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-6 col-xl-4">
+            <div class="wallet-stat-card">
+                <span>Total de billeteras</span>
+                <h2>@wallets.Count</h2>
+                <p>Billeteras registradas</p>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-4">
+            <div class="wallet-stat-card">
+                <span>Billeteras activas</span>
+                <h2>@activeWallets</h2>
+                <p>Cuentas habilitadas</p>
+            </div>
+        </div>
+
+        <div class="col-md-12 col-xl-4">
+            <div class="wallet-stat-card">
+                <span>Saldo acumulado</span>
+                <h2>₡@totalBalance.ToString("N2")</h2>
+                <p>Saldo total de las billeteras</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- LISTADO DE BILLETERAS -->
+
+    <div class="wallet-list-card">
+
+        <div class="wallet-list-header">
+            <div>
+                <h4>Listado de billeteras</h4>
+                <p>Información financiera de los estudiantes registrados.</p>
+            </div>
+
+            <span class="wallet-count">
+                @wallets.Count registradas
+            </span>
+        </div>
+
+        @if (wallets.Count == 0)
         {
-            <tr>
-                <td>
-                    @wallet.Student.FirstName @wallet.Student.LastName
-                </td>
+            <div class="wallets-empty">
+                <h5>No hay billeteras registradas</h5>
+                <p>
+                    Las billeteras se crean automáticamente
+                    al registrar un estudiante.
+                </p>
 
-                <td>
-                    @wallet.Student.SicaiStudentId
-                </td>
-
-                <td>
-                    ₡@wallet.Balance.ToString("N2")
-                </td>
-
-                <td>
-                    @(wallet.IsActive ? "Activa" : "Inactiva")
-                </td>
-                <td>
-                    <a asp-action="Recharge"
-                        asp-route-id="@wallet.Id"
-                        class="btn btn-success btn-sm">
-                        Recargar
-                    </a>
-
-                    <a asp-action="Purchase"
-                        asp-route-id="@wallet.Id"
-                        class="btn btn-danger btn-sm">
-                        Purchase
-                    </a>
-
-                    <a asp-action="History"
-                     asp-route-id="@wallet.Id"
-                     class="btn btn-info btn-sm">
-                     History
-                    </a>
-                </td>
-
-                
-            </tr>
+                <a asp-controller="Students"
+                   asp-action="Create"
+                   class="btn btn-morado">
+                    Registrar estudiante
+                </a>
+            </div>
         }
-    </tbody>
-</table>
+        else
+        {
+            <div class="table-responsive">
 
-<a asp-controller="Students" asp-action="Index" class="btn btn-secondary">
-    Volver a estudiantes
-</a>
+                <table class="table wallets-table align-middle mb-0">
+
+                    <thead>
+                        <tr>
+                            <th>Estudiante</th>
+                            <th>Carné SICAI</th>
+                            <th>Saldo disponible</th>
+                            <th>Estado</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var wallet in wallets)
+                        {
+                            <tr>
+                                <td class="wallet-student-name">
+                                    @wallet.Student.FirstName
+                                    @wallet.Student.LastName
+                                </td>
+
+                                <td>
+                                    @wallet.Student.SicaiStudentId
+                                </td>
+
+                                <td class="wallet-balance">
+                                    ₡@wallet.Balance.ToString("N2")
+                                </td>
+
+                                <td>
+                                    @if (wallet.IsActive)
+                                    {
+                                        <span class="wallet-status wallet-active">
+                                            Activa
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="wallet-status wallet-inactive">
+                                            Inactiva
+                                        </span>
+                                    }
+                                </td>
+
+                                <td>
+                                    <div class="wallet-actions">
+
+                                        <a asp-action="Recharge"
+                                           asp-route-id="@wallet.Id"
+                                           class="btn btn-sm btn-wallet-recharge">
+                                            Recargar
+                                        </a>
+
+                                        <a asp-action="Purchase"
+                                           asp-route-id="@wallet.Id"
+                                           class="btn btn-sm btn-wallet-purchase">
+                                            Comprar
+                                        </a>
+
+                                        <a asp-action="History"
+                                           asp-route-id="@wallet.Id"
+                                           class="btn btn-sm btn-wallet-history">
+                                            Movimientos
+                                        </a>
+
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+
+                </table>
+
+            </div>
+        }
+
+    </div>
+
+</div>

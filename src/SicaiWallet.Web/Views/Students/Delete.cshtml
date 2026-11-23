@@ -4,24 +4,90 @@
     ViewData["Title"] = "Eliminar estudiante";
 }
 
-<h1>Eliminar estudiante</h1>
+<div class="student-form-page">
 
-<h3>¿Estás seguro de que deseas eliminar este estudiante?</h3>
+    <div class="student-form-heading">
+        <span class="students-eyebrow">GESTIÓN ACADÉMICA</span>
 
-<div>
-    <p><strong>Carné:</strong> @Model.SicaiStudentId</p>
-    <p><strong>Nombre:</strong> @Model.FirstName</p>
-    <p><strong>Apellido:</strong> @Model.LastName</p>
+        <h1>Eliminar estudiante</h1>
+
+        <p>
+            Revisa la información antes de confirmar esta acción.
+        </p>
+    </div>
+
+    <div class="student-form-card">
+
+        <div class="student-form-card-header">
+            <h4>Confirmación de eliminación</h4>
+            <p>Esta acción debe realizarse con cuidado.</p>
+        </div>
+
+        <div class="student-form-card-body">
+
+            <div class="delete-warning">
+                <strong>Atención:</strong>
+                ¿Estás seguro de que deseas eliminar este estudiante?
+            </div>
+
+            <div class="student-delete-details">
+
+                <div class="delete-detail">
+                    <span>Carné SICAI</span>
+                    <strong>@Model.SicaiStudentId</strong>
+                </div>
+
+                <div class="delete-detail">
+                    <span>Nombre</span>
+                    <strong>@Model.FirstName</strong>
+                </div>
+
+                <div class="delete-detail">
+                    <span>Apellido</span>
+                    <strong>@Model.LastName</strong>
+                </div>
+
+                <div class="delete-detail">
+                    <span>Estado</span>
+
+                    @if (Model.IsActive)
+                    {
+                        <span class="student-status status-active">
+                            Activo
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="student-status status-inactive">
+                            Inactivo
+                        </span>
+                    }
+                </div>
+
+            </div>
+
+            <form asp-controller="Students"
+                  asp-action="Delete"
+                  asp-route-id="@Model.Id"
+                  method="post">
+
+                <div class="student-form-actions">
+
+                    <button type="submit" class="btn btn-delete-confirm">
+                        Sí, eliminar estudiante
+                    </button>
+
+                    <a asp-controller="Students"
+                       asp-action="Index"
+                       class="btn btn-outline-light">
+                        Cancelar
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
 </div>
-
-<form asp-controller="Students"
-      asp-action="Delete"
-      asp-route-id="@Model.Id"
-      method="post">
-
-    <button type="submit">Sí, eliminar</button>
-
-    <a asp-controller="Students" asp-action="Index">
-        Cancelar
-    </a>
-</form>

@@ -1,148 +1,159 @@
 @model SicaiWallet.Web.Models.ViewModels.DashboardViewModel
 
 @{
-    ViewData["Title"] = "Dashboard";
+    ViewData["Title"] = "Panel principal";
 }
 
-<h1 class="mb-4">Dashboard</h1>
+<div class="dashboard-heading mb-4">
+    <div>
+        <span class="dashboard-eyebrow">RESUMEN GENERAL</span>
+        <h1 class="dashboard-title">Panel principal</h1>
+        <p class="text-muted mb-0">
+            Bienvenido a SICAI Wallet. Aquí encontrarás un resumen del sistema.
+        </p>
+    </div>
+</div>
 
-<p class="text-muted">
-    Welcome to SICAI Wallet. Here's an overview of the system.
-</p>
-
-<div class="row g-3 mb-4">
+<div class="row g-4 mb-4">
 
     <div class="col-md-6 col-xl-3">
-        <div class="card shadow-sm border-0 h-100">
-            <div class="card-body">
-                <h6 class="text-muted">Total Students</h6>
-                <h2 class="fw-bold">@Model.TotalStudents</h2>
-                <span class="text-primary">Registered students</span>
-            </div>
+        <div class="dashboard-card students-card">
+            <span class="dashboard-card-label">Total de estudiantes</span>
+            <h2>@Model.TotalStudents</h2>
+            <p>Estudiantes registrados</p>
         </div>
     </div>
 
     <div class="col-md-6 col-xl-3">
-        <div class="card shadow-sm border-0 h-100">
-            <div class="card-body">
-                <h6 class="text-muted">Active Wallets</h6>
-                <h2 class="fw-bold">@Model.ActiveWallets</h2>
-                <span class="text-success">Active accounts</span>
-            </div>
+        <div class="dashboard-card wallets-card">
+            <span class="dashboard-card-label">Billeteras activas</span>
+            <h2>@Model.ActiveWallets</h2>
+            <p>Cuentas habilitadas</p>
         </div>
     </div>
 
     <div class="col-md-6 col-xl-3">
-        <div class="card shadow-sm border-0 h-100">
-            <div class="card-body">
-                <h6 class="text-muted">Total Balance</h6>
-                <h2 class="fw-bold">
-                    ₡@Model.TotalBalance.ToString("N2")
-                </h2>
-                <span class="text-primary">Money in wallets</span>
-            </div>
+        <div class="dashboard-card balance-card">
+            <span class="dashboard-card-label">Saldo total</span>
+            <h2>₡@Model.TotalBalance.ToString("N2")</h2>
+            <p>Dinero disponible en billeteras</p>
         </div>
     </div>
 
     <div class="col-md-6 col-xl-3">
-        <div class="card shadow-sm border-0 h-100">
-            <div class="card-body">
-                <h6 class="text-muted">Total Transactions</h6>
-                <h2 class="fw-bold">@Model.TotalTransactions</h2>
-                <span class="text-secondary">Recorded movements</span>
-            </div>
+        <div class="dashboard-card transactions-card">
+            <span class="dashboard-card-label">Movimientos registrados</span>
+            <h2>@Model.TotalTransactions</h2>
+            <p>Total de operaciones</p>
         </div>
     </div>
 
 </div>
 
-<div class="card shadow-sm border-0">
-    <div class="card-header bg-white py-3">
-        <h5 class="mb-0">Recent Transactions</h5>
+<div class="dashboard-section">
+
+    <div class="dashboard-section-header">
+        <div>
+            <h4>Movimientos recientes</h4>
+            <p>Últimas cinco operaciones registradas</p>
+        </div>
+
+        <a asp-controller="Wallets"
+           asp-action="Index"
+           class="btn btn-outline-primary btn-sm">
+            Ver billeteras
+        </a>
     </div>
 
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-striped table-hover mb-0">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Student</th>
-                        <th>Type</th>
-                        <th>Amount</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
+    <div class="table-responsive">
+        <table class="table dashboard-table align-middle mb-0">
 
-                <tbody>
-                    @if (!Model.RecentTransactions.Any())
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Estudiante</th>
+                    <th>Tipo de movimiento</th>
+                    <th>Monto</th>
+                    <th>Descripción</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (!Model.RecentTransactions.Any())
+                {
+                    <tr>
+                        <td colspan="5" class="text-center py-4">
+                            No hay movimientos registrados.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var transaction in Model.RecentTransactions)
                     {
                         <tr>
-                            <td colspan="5" class="text-center py-4">
-                                No transactions found.
+                            <td>
+                                @(transaction.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm"))
                             </td>
+
+                            <td class="fw-semibold">
+                                @transaction.WalletAccount.Student.FirstName
+                                @transaction.WalletAccount.Student.LastName
+                            </td>
+
+                            <td>
+                                @if (transaction.Type == SicaiWallet.Web.Models.WalletTransactionType.Recharge)
+                                {
+                                    <span class="badge bg-success">Recarga</span>
+                                }
+                                else if (transaction.Type == SicaiWallet.Web.Models.WalletTransactionType.Purchase)
+                                {
+                                    <span class="badge bg-danger">Compra</span>
+                                }
+                                else if (transaction.Type == SicaiWallet.Web.Models.WalletTransactionType.Refund)
+                                {
+                                    <span class="badge bg-info text-dark">Reembolso</span>
+                                }
+                            </td>
+
+                            <td>
+                                @if (transaction.Type == SicaiWallet.Web.Models.WalletTransactionType.Recharge ||
+                                     transaction.Type == SicaiWallet.Web.Models.WalletTransactionType.Refund)
+                                {
+                                    <span class="text-success fw-semibold">
+                                        +₡@transaction.Amount.ToString("N2")
+                                    </span>
+                                }
+                                else if (transaction.Type == SicaiWallet.Web.Models.WalletTransactionType.Purchase)
+                                {
+                                    <span class="text-danger fw-semibold">
+                                        -₡@transaction.Amount.ToString("N2")
+                                    </span>
+                                }
+                            </td>
+
+                            <td>@transaction.Description</td>
                         </tr>
                     }
-                    else
-                    {
-                        @foreach (var transaction in Model.RecentTransactions)
-                        {
-                            <tr>
-                                <td>
-                                 @(transaction.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm"))
-                                </td>
+                }
+            </tbody>
 
-                                <td>
-                                    @transaction.WalletAccount.Student.FirstName
-                                    @transaction.WalletAccount.Student.LastName
-                                </td>
-
-                                <td>
-                                    @if (transaction.Type == SicaiWallet.Web.Models.WalletTransactionType.Recharge)
-                                    {
-                                        <span class="badge bg-success">Recharge</span>
-                                    }
-                                    else if (transaction.Type == SicaiWallet.Web.Models.WalletTransactionType.Purchase)
-                                    {
-                                        <span class="badge bg-danger">Purchase</span>
-                                    }
-                                </td>
-
-                                <td>
-                                    @if (transaction.Type == SicaiWallet.Web.Models.WalletTransactionType.Recharge)
-                                    {
-                                        <span class="text-success fw-semibold">
-                                            +₡@transaction.Amount.ToString("N2")
-                                        </span>
-                                    }
-                                    else if (transaction.Type == SicaiWallet.Web.Models.WalletTransactionType.Purchase)
-                                    {
-                                        <span class="text-danger fw-semibold">
-                                            -₡@transaction.Amount.ToString("N2")
-                                        </span>
-                                    }
-                                </td>
-
-                                <td>@transaction.Description</td>
-                            </tr>
-                        }
-                    }
-                </tbody>
-            </table>
-        </div>
+        </table>
     </div>
 </div>
 
-<div class="mt-4">
+<div class="dashboard-quick-actions mt-4">
+    <h5>Accesos rápidos</h5>
+
     <a asp-controller="Students"
        asp-action="Index"
-       class="btn btn-outline-primary">
-        Manage Students
+       class="btn btn-primary">
+        Gestionar estudiantes
     </a>
 
     <a asp-controller="Wallets"
        asp-action="Index"
-       class="btn btn-outline-secondary">
-        Manage Wallets
+       class="btn btn-outline-primary">
+        Gestionar billeteras
     </a>
 </div>
